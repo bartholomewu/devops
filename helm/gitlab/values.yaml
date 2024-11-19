@@ -14,5 +14,4 @@ nginx-ingress:
   controller:
     service:
       nodePorts:
-        # http: 30080
         https: 30080

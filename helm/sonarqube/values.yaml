@@ -1,8 +1,8 @@
 ingress:
   enabled: true
   hosts:
-    - name: sonarqube.local
+    - name: sonarqube.localhost
 service:
-  type: ClusterIP
-  externalPort: 30083
-  internalPort: 9000
+  type: NodePort
+  port: 9000
+  nodePort: 30082

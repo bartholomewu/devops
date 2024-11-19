@@ -13,4 +13,4 @@ controller:
     enabled: true
     hostName: localhost
   serviceType: NodePort
-  nodePort: 30082  # You can set this to any available port between 30000-32767
+  nodePort: 30081  # You can set this to any available port between 30000-32767

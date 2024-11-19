@@ -26,10 +26,10 @@
 
 2. Jenkins
     1. Get your `admin` user password by running:
-        `sudo kubectl exec --namespace jenkins -it svc/jenkins -c jenkins -- /bin/cat /run/secrets/additional/chart-admin-password && echo`
-    2. Visit `http://jenkins.localhost`
+        `sudo kubectl exec --namespace jenkins -it svc/jenkins -c jenkins -- /bin/cat /run/secrets/additional/chart-admin-password > jenkins-secrets.txt`
+    2. Visit `http://jenkins.localhost:8181`
     3. Login with the password from step 1 and the username: `admin`
 
 3. Sonarqube
-    1. Visit `http://sonarqube.localhost`
-    4. admin/admin
+    1. Visit `http://sonarqube.localhost:8282`
+    4. Login with `admin/admin`
