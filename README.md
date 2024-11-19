@@ -16,6 +16,7 @@
     3. (Deletion command) `sudo kind delete cluster --name project-cluster`
 2. Setup Helmfile
     1. `sudo helmfile apply -f helm/helmfile.yaml`
+    2. (Deletion command) `sudo helmfile destroy -f helm/helmfile.yaml`
 
 ### Notes
 
@@ -32,4 +33,4 @@
 
 3. Sonarqube
     1. Visit `http://sonarqube.localhost:8282`
-    4. Login with `admin/admin`
+    4. Login with `admin:admin`
