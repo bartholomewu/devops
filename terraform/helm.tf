@@ -23,6 +23,11 @@ resource "helm_release" "gitlab" {
         value = "ce"  # Use "ce" for Community Edition, or "ee" for Enterprise Edition
     }
 
+    set {
+        name  = "nginx-ingress.controller.service.nodePorts.http"
+        value = 30080
+    }
+
     # Configure GitLab services, storage, and persistence settings
     # set {
     #     name  = "gitlab-runner.install"

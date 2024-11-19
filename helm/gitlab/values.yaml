@@ -1,0 +1,18 @@
+certmanager-issuer:
+  email: sircodesworth@gmail.com
+
+global:
+  edition: ce
+  hosts:
+    domain: localhost
+  ingress:
+    tls:
+      enabled: false
+    configureCertmanager: false
+
+nginx-ingress:
+  controller:
+    service:
+      nodePorts:
+        # http: 30080
+        https: 30080

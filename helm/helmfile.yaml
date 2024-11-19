@@ -1,0 +1,28 @@
+# helmfile.yaml
+
+repositories:
+  - name: gitlab
+    url: https://charts.gitlab.io
+  - name: jenkins
+    url: https://charts.jenkins.io
+  - name: sonarqube
+    url: https://sonarsource.github.io/helm-chart-sonarqube
+
+releases:
+  - name: gitlab
+    namespace: gitlab
+    chart: gitlab/gitlab
+    values:
+      - ./gitlab/values.yaml
+
+  # - name: jenkins
+  #   namespace: jenkins
+  #   chart: jenkins/jenkins
+  #   values:
+  #     - ./jenkins/values.yaml
+
+  # - name: sonarqube
+  #   namespace: sonarqube
+  #   chart: sonarqube/sonarqube
+  #   values:
+  #     - ./sonarqube/values.yaml

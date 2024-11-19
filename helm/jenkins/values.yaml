@@ -1,0 +1,16 @@
+# controller:
+#   serviceType: NodePort
+#   nodePort: 30082  # You can set this to any available port between 30000-32767
+#   # Additional configuration (optional):
+#   # jenkinsUrl: http://<node-ip>:32000
+
+# # Use persistent storage (optional)
+# persistence:
+#   enabled: true  # Set to true if you want persistent volume storage
+
+controller:
+  ingress:
+    enabled: true
+    hostName: localhost
+  serviceType: NodePort
+  nodePort: 30082  # You can set this to any available port between 30000-32767
