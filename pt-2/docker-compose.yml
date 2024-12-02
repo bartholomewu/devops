@@ -1,0 +1,109 @@
+services:
+  gitlab:
+    image: zengxs/gitlab:latest
+    container_name: gitlab-ce
+    restart: always
+    hostname: 'localhost'
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'http://gitlab.automation.me'
+        gitlab_rails['gitlab_shell_ssh_port'] = 2424
+    ports:
+      - '80:80'
+      - '8443:443'
+    volumes:
+      - '$GITLAB_HOME/config:/etc/gitlab'
+      - '$GITLAB_HOME/logs:/var/log/gitlab'
+      - '$GITLAB_HOME/data:/var/opt/gitlab'
+    networks:
+      - gitlab
+    shm_size: '256m'
+
+  gitlab-runner:
+    image: gitlab/gitlab-runner:latest
+    container_name: docker-gitlab-runner
+    restart: always
+    privileged: true  # Enable privileged mode to create swap space
+    volumes:
+      - ./config:/etc/gitlab-runner
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - gitlab
+    environment:
+      - CI_SERVER_URL=http://gitlab.automation.me
+      - REGISTRATION_TOKEN=dZfmBGk_n-e8HdWx7hsy
+      - RUNNER_TAG_LIST=docker-tag
+      - RUNNER_EXECUTOR=docker
+      - DOCKER_IMAGE=alpine:latest
+    extra_hosts:
+      - "gitlab.automation.me:127.0.0.1"
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 4196M
+        reservations:
+          cpus: '2'
+          memory: 2048M
+    memswap_limit: 6G
+
+  sonarqube:
+    image: sonarqube:community
+    hostname: sonarqube
+    container_name: sonarqube
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 2048M
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SONAR_JDBC_URL: jdbc:postgresql://db:5432/sonar
+      SONAR_JDBC_USERNAME: sonar
+      SONAR_JDBC_PASSWORD: sonar
+      SONAR_SEARCH_JAVA_OPTS: "-Xms512m -Xmx1g"
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+      - sonarqube_logs:/opt/sonarqube/logs
+      - sonarqube_temp:/opt/sonarqube/temp
+    ports:
+      - "9000:9000"
+  
+  db:
+    image: postgres:15
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    hostname: postgresql
+    container_name: postgresql
+    environment:
+      POSTGRES_USER: sonar
+      POSTGRES_PASSWORD: sonar
+      POSTGRES_DB: sonar
+    volumes:
+      - postgresql:/var/lib/postgresql
+      - postgresql_data:/var/lib/postgresql/data
+
+networks:
+  gitlab:
+    name: gitlab-network
+
+volumes:
+  gitlab_config:
+  gitlab_logs:
+  gitlab_data:
+  sonarqube_data:
+  sonarqube_temp:
+  sonarqube_extensions:
+  sonarqube_logs:
+  postgresql:
+  postgresql_data:
+
+
