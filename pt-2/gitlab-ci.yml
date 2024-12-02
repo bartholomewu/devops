@@ -1,0 +1,41 @@
+stages:
+  - test
+  - build
+  - sonarqube_scan
+
+hello:
+  stage: test
+  tags:
+    - try-me
+  script:
+    - echo "Hello World!"
+
+build-project:
+  stage: build
+  tags:
+    - try-me
+  timeout: 4h
+  script:
+    # Install dependencies
+    - apt-get update && apt-get install -y npm ng
+    - npm install
+    #- npm run test
+
+sonarqube_scan:
+  stage: sonarqube_scan
+  tags:
+    - try-me
+  timeout: 4h
+  script:
+    # Install OpenJDK 11
+    - apt-get update && apt-get install -y openjdk-11-jdk wget unzip curl
+    # Set up Sonar Scanner
+    - export SONAR_SCANNER_VERSION=6.2.0.4584
+    - export SONAR_SCANNER_HOME=$HOME/.sonar/sonar-scanner-$SONAR_SCANNER_VERSION-linux-aarch64
+    - curl --create-dirs -sSLo $HOME/.sonar/sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-$SONAR_SCANNER_VERSION-linux-aarch64.zip
+    - unzip -o $HOME/.sonar/sonar-scanner.zip -d $HOME/.sonar/
+    - export PATH=$SONAR_SCANNER_HOME/bin:$PATH
+    # Run Sonar Scanner
+    - echo "Running Sonar Scanner..."
+    - sonar-scanner -Dsonar.projectKey=FinalProjectVideo -Dsonar.sources=. -Dsonar.host.url=http://127.0.0.1:9000
+
