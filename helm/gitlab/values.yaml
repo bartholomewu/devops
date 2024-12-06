@@ -5,6 +5,10 @@ global:
   edition: ce
   hosts:
     domain: localhost
+  registry:
+    enabled: true
+  minio:
+    enabled: true
   ingress:
     tls:
       enabled: false
@@ -15,3 +19,23 @@ nginx-ingress:
     service:
       nodePorts:
         https: 30080
+
+registry:
+  enabled: true
+  storage:
+    secret:
+      name: gitlab-registry-storage
+      key: config
+  service:
+    type: NodePort
+    nodePort: 30083
+  ingress:
+    enabled: true
+    hosts:
+      - registry.localhost
+
+persistence:
+  enabled: true
+  accessMode: ReadWriteOnce
+  size: 10Gi
+  
