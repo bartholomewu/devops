@@ -56,20 +56,7 @@ pipeline {
                 sh "docker pull ${env.CONTAINER_IMAGE}:${env.CONTAINER_TAG}"
             }
         }
-        
-        stage('Snyk Security Scan') {
-            steps {
-                snykSecurity(
-                    snykInstallation: 'snyk',
-                    snykTokenId: 'snyk-api',
-                    projectName: "${env.CONTAINER_IMAGE}:${env.CONTAINER_TAG}",
-                    failOnIssues: false,
-                    monitorProjectOnBuild: true,
-                    additionalArguments: "--docker ${env.CONTAINER_IMAGE}:${env.CONTAINER_TAG}"
-                )
-            }
-        }
-        
+
         stage('Push to GitLab Registry') {
             steps {
                 script {
@@ -81,7 +68,21 @@ pipeline {
                 }
             }
         }
-    }
+    
+        stage('Snyk Security Scan') {
+            steps {
+                snykSecurity(
+                    snykInstallation: 'snyk',
+                    snykTokenId: 'snyk-api',
+                    projectName: "${env.CONTAINER_IMAGE}:${env.CONTAINER_TAG}",
+                    failOnIssues: true,
+                    monitorProjectOnBuild: true,
+                    additionalArguments: """--docker ${env.CONTAINER_IMAGE}:${env.CONTAINER_TAG} \
+                        --severity-threshold=high"""
+                )
+            }
+        }
+    }    
     
     post {
         always {
