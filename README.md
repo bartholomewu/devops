@@ -1,7 +1,7 @@
 # Final Project
 
-# FINAL SUBMISSION VIDEOS 
-[https://livejohnshopkins-my.sharepoint.com/:f:/g/personal/mmaggio6_jh_edu/Ek8lfPPZulROi5Xh85HI2O4BGFQFi5yF4o5LuShXl3E0rg?e=S0RdfW](VIDEOS HERE)
+# Final Submission - Videos
+[VIDEOS HERE](https://livejohnshopkins-my.sharepoint.com/:f:/g/personal/mmaggio6_jh_edu/Ek8lfPPZulROi5Xh85HI2O4BGFQFi5yF4o5LuShXl3E0rg?e=S0RdfW)
 
 ## Pre-requisites
 
