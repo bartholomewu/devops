@@ -1,0 +1,44 @@
+version: '3.8'
+services:
+  gitlab:
+    container_name: gitlab
+    image: 'gitlab/gitlab-ce:latest'
+    restart: always
+    hostname: 'gitlab'
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'http://localhost'
+        registry_external_url 'http://gitlab:5050'
+        registry['listen_address'] = "0.0.0.0:5050"  
+        gitlab_rails['registry_enabled'] = true
+        gitlab_rails['allow_local_requests_from_web_hooks_and_services'] = true
+        gitlab_rails['gitlab_default_projects_features_container_registry'] = true
+    ports:
+      - '80:80'
+      - '443:443'
+      - '5050:5050'
+      - '22:22'
+    volumes:
+      - './gitlab/config:/etc/gitlab'
+      - './gitlab/logs:/var/log/gitlab'
+      - './gitlab/data:/var/opt/gitlab'
+      - './gitlab/registry:/var/opt/gitlab/registry'
+
+  jenkins:
+    build:
+      context: .
+      dockerfile: Dockerfile.jenkins
+    restart: always
+    privileged: true
+    user: root
+    network_mode: "host"
+    ports:
+      - '8080:8080'
+      - '50000:50000'
+    volumes:
+      - './jenkins_home:/var/jenkins_home'
+      - '/var/run/docker.sock:/var/run/docker.sock'
+    environment:
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - JENKINS_HOST=http://localhost:8080
+

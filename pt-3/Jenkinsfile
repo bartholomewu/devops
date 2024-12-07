@@ -1,0 +1,110 @@
+pipeline {
+    agent any
+    
+    environment {
+        GITLAB_CREDS = credentials('gitlab-auth')
+        REGISTRY_URL = 'localhost:5050'
+        PROJECT_PATH = 'root/final-project/juice-shop'
+    }
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                script {
+                    try {
+                        cleanWs()
+                        git url: 'http://gitlab/root/final-project.git',
+                            credentialsId: 'gitlab-auth'
+                        echo "Successfully checked out repository"
+                    } catch (Exception e) {
+                        echo "Failed to checkout repository: ${e.getMessage()}"
+                        error "Checkout failed: ${e.getMessage()}"
+                    }
+                }
+            }
+        }
+        
+        stage('Parse Container Spec') {
+            steps {
+                script {
+                    try {
+                        echo "Creating and reading container-spec.json..."
+                        
+                        // Create the JSON file
+                        writeFile file: 'container-spec.json', text: '''
+        {
+            "container": {
+                "image": "bkimminich/juice-shop",
+                "tag": "latest"
+            }
+        }'''
+                        
+                        // Show the file was created
+                        sh 'ls -l container-spec.json'
+                        echo "File contents:"
+                        sh 'cat container-spec.json'
+                        
+                        // Read file contents first, then parse
+                        def jsonText = readFile('container-spec.json')
+                        def jsonSlurper = new groovy.json.JsonSlurper()
+                        def containerSpec = jsonSlurper.parseText(jsonText)
+                        
+                        env.CONTAINER_IMAGE = containerSpec.container.image
+                        env.CONTAINER_TAG = containerSpec.container.tag ?: 'latest'
+                        
+                        echo "Container specification parsed successfully"
+                        echo "Image: ${env.CONTAINER_IMAGE}"
+                        echo "Tag: ${env.CONTAINER_TAG}"
+                        
+                    } catch (Exception e) {
+                        echo "Error class: ${e.getClass()}"
+                        echo "Error message: ${e.getMessage()}"
+                        echo "Stack trace:"
+                        e.printStackTrace()
+                        error "Failed to parse container spec: ${e.getMessage()}"
+                    }
+                }
+            }
+        }
+        
+        stage('Pull Container') {
+            steps {
+                sh "docker pull ${env.CONTAINER_IMAGE}:${env.CONTAINER_TAG}"
+            }
+        }
+        
+        stage('Snyk Security Scan') {
+            steps {
+                snykSecurity(
+                    snykInstallation: 'snyk',
+                    snykTokenId: 'snyk-api',
+                    projectName: "${env.CONTAINER_IMAGE}:${env.CONTAINER_TAG}",
+                    failOnIssues: false,
+                    monitorProjectOnBuild: true,
+                    additionalArguments: "--docker ${env.CONTAINER_IMAGE}:${env.CONTAINER_TAG}"
+                )
+            }
+        }
+        
+        stage('Push to GitLab Registry') {
+            steps {
+                script {
+                    sh """
+                        docker tag ${env.CONTAINER_IMAGE}:${env.CONTAINER_TAG} ${REGISTRY_URL}/${PROJECT_PATH}:${env.CONTAINER_TAG}
+                        docker login ${REGISTRY_URL} -u $GITLAB_CREDS_USR -p $GITLAB_CREDS_PSW
+                        docker push ${REGISTRY_URL}/${PROJECT_PATH}:${env.CONTAINER_TAG}
+                    """
+                }
+            }
+        }
+    }
+    
+    post {
+        always {
+            sh """
+                docker rmi ${env.CONTAINER_IMAGE}:${env.CONTAINER_TAG} || true
+                docker rmi ${REGISTRY_URL}/${PROJECT_PATH}:${env.CONTAINER_TAG} || true
+            """
+        }
+    }
+}
