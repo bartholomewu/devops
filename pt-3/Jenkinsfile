@@ -27,23 +27,7 @@ pipeline {
         stage('Parse Container Spec') {
             steps {
                 script {
-                    try {
-                        echo "Creating and reading container-spec.json..."
-                        
-                        // Create the JSON file
-                        writeFile file: 'container-spec.json', text: '''
-        {
-            "container": {
-                "image": "bkimminich/juice-shop",
-                "tag": "latest"
-            }
-        }'''
-                        
-                        // Show the file was created
-                        sh 'ls -l container-spec.json'
-                        echo "File contents:"
-                        sh 'cat container-spec.json'
-                        
+                    try {                       
                         // Read file contents first, then parse
                         def jsonText = readFile('container-spec.json')
                         def jsonSlurper = new groovy.json.JsonSlurper()
